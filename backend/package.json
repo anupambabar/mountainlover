@@ -1,0 +1,47 @@
+{
+  "name": "mountainlover-backend",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "prebuild": "node ../scripts/check-safe-build.js",
+    "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js",
+    "lint": "eslint \"src/**/*.ts\" \"test/**/*.ts\" --max-warnings=0",
+    "format": "prettier --check \"src/**/*.ts\" \"test/**/*.ts\"",
+    "test": "vitest",
+    "test:ci": "vitest --run --coverage",
+    "db:validate": "prisma validate --schema ./prisma/schema.prisma",
+    "db:generate": "prisma generate --schema ./prisma/schema.prisma"
+  },
+  "dependencies": {
+    "@prisma/client": "^7.0.1",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2",
+    "helmet": "^8.1.0",
+    "validator": "^13.15.23",
+    "zod": "^4.1.13"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.5.1",
+    "@types/supertest": "^2.0.13",
+    "@types/validator": "^13.15.10",
+    "@typescript-eslint/eslint-plugin": "^8.48.0",
+    "@typescript-eslint/parser": "^8.48.0",
+    "@vitest/coverage-v8": "^4.0.14",
+    "eslint": "^8.45.0",
+    "eslint-config-prettier": "^8.8.0",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "eslint-plugin-unused-imports": "^4.3.0",
+    "prettier": "^3.7.1",
+    "prisma": "^7.0.1",
+    "supertest": "^6.3.3",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.2.2",
+    "vitest": "^4.0.14"
+  }
+}

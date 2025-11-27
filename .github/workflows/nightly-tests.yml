@@ -1,0 +1,38 @@
+name: Nightly Tests
+
+on:
+  schedule:
+    - cron: '0 2 * * *' # daily at 02:00 UTC
+
+jobs:
+  nightly:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install backend deps
+        working-directory: backend
+        run: npm ci
+
+      - name: Run backend tests
+        working-directory: backend
+        run: npm run test:ci
+
+      - name: Install frontend deps
+        working-directory: frontend
+        run: npm ci
+
+      - name: Run frontend tests
+        working-directory: frontend
+        run: npm run test:ci
+
+      - name: Merge and upload coverage
+        run: |
+          node ./scripts/merge-lcov.js backend/coverage/lcov.info frontend/coverage/lcov.info coverage/combined.lcov
+          cat coverage/combined-coverage.txt

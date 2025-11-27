@@ -1,0 +1,25 @@
+Item,Assumption,Cloud (USD/month),Hybrid (USD/month),On-Prem (USD/month),Cloud (INR/month),Hybrid (INR/month),On-Prem (INR/month)
+Registered users,Total registered users,1000,1000,1000,,,,
+Monthly active users (MAU),Assume 30% of registered users,300,300,300,,,,
+Monthly paid transactions,Estimate number of paid registrations per month,100,100,100,,,,
+Processed payment volume,Avg transaction $50 → 100 txns -> $5,000,5000,5000,417500,417500,417500
+
+Postgres (managed vs self),Small instance (RDS/db.t3.small) + backups,75,75,40,6263,6263,3340
+Object storage (100 GB),S3 or provider blob storage,5,20,10,418,1670,835
+Redis (cache/session),Managed Elasticache small,30,15,10,2505,1253,835
+Compute (app runtime),Managed container service / small k8s nodes,100,80,50,8350,6680,4175
+Message queue,Managed PubSub/RabbitMQ,30,10,10,2505,835,835
+Observability & logging,Managed (Datadog/Cloud logs) vs self-hosted,70,30,40,5845,2505,3340
+CDN,Cloudflare / basic,5,5,0,418,418,0
+SMS OTP,Assume 300 OTPs/month @ $0.05/SMS,15,15,15,1253,1253,1253
+Payment gateway fees,~2.5% of $5,000 processed volume,125,125,125,10438,10438,10438
+Ops staffing (amortized),Minimal ops support estimate,0,200,1500,0,16700,125250
+
+Total,Estimated monthly total,455,405,1800,37993,33818,150300
+
+Notes,Assumptions and explanations,,,,,
+- All numbers are indicative monthly estimates for planning only.,,,,,
+- Payment fees are transactional and scale with volume (2.5% assumed).,,,,,
+- Hybrid assumes managed DB but self-hosted storage/Redis to save recurring costs.,,,,,
+- On-prem includes an ops staffing estimate (one part-time engineer) and amortized hardware.,,,,,
+- CDN costs can be near-zero with Cloudflare free tier for small traffic.,,,,,

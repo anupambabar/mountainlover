@@ -1,0 +1,15 @@
+Item,Assumption,USD Low,USD Mid,USD High,INR Low,INR Mid,INR High
+Postgres (managed),Small instance + backups,60.00,75.00,112.50,5010,6263,9394
+Object storage (100GB),S3 or provider blob storage,4.00,5.00,7.50,334,418,626
+Redis (cache/session),Managed Elasticache small,24.00,30.00,45.00,2004,2505,3758
+Compute (app runtime),Managed container service / small k8s nodes,80.00,100.00,150.00,6680,8350,12525
+Message queue,Managed PubSub/RabbitMQ,24.00,30.00,45.00,2004,2505,3758
+Observability & logging,Managed (Datadog/Cloud logs),56.00,70.00,105.00,4676,5845,8768
+CDN (basic),Cloudflare / basic,4.00,5.00,7.50,334,418,626
+SMS OTP,Assume 300 OTPs/month @ $0.05/SMS,12.00,15.00,22.50,1002,1253,1879
+Payment gateway fees,~2.5% of $5,000 processed volume,100.00,125.00,187.50,8350,10438,15656
+Ops staffing (amortized),Minimal ops support estimate,0.00,0.00,0.00,0,0,0
+
+Total,Estimated monthly total,364.00,455.00,682.50,30394,37993,56989
+
+Notes,Scenarios: Low = 80% of Mid; High = 150% of Mid; INR conversion: 1 USD = 83.5 INR

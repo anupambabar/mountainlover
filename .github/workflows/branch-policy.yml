@@ -1,0 +1,44 @@
+name: Enforce Branching Policy
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+  push:
+    branches: [ main, develop, 'release-*' ]
+
+jobs:
+  pr-policy:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check branch naming for PR
+        env:
+          HEAD: ${{ github.head_ref }}
+          BASE: ${{ github.base_ref }}
+        run: |
+          echo "PR from '$HEAD' to '$BASE'"
+          if [[ "$HEAD" == feature/* ]]; then
+            if [[ ! "$BASE" == release-* ]]; then
+              echo "ERROR: feature/* branches must target release-* branches."
+              exit 1
+            fi
+          fi
+          echo "Branch policy: OK"
+
+  push-policy:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check direct push to protected branches
+        env:
+          REF: ${{ github.ref }}
+          Pusher: ${{ github.actor }}
+        run: |
+          echo "Push on $REF by $Pusher"
+          if [[ "$REF" == refs/heads/main || "$REF" == refs/heads/develop || "$REF" == refs/heads/release-* ]]; then
+            echo "WARNING: Direct pushes to main/develop/release-* are discouraged."
+            echo "Please open Pull Requests from feature/* branches targeting release-* as per branching policy."
+            # Fail the check so branch protection can rely on this status
+            exit 1
+          fi
+          echo "Push policy: OK"
