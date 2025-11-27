@@ -1,0 +1,107 @@
+name: CI - Coverage
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  coverage:
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18.x]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Install backend deps
+        working-directory: backend
+        run: |
+          npm ci
+
+      - name: Run backend tests (coverage)
+        working-directory: backend
+        run: |
+          npm run test:ci
+
+      - name: Install frontend deps
+        working-directory: frontend
+        run: |
+          npm ci
+
+      - name: Run frontend tests (coverage)
+        working-directory: frontend
+        run: |
+          npm run test:ci
+
+      - name: Upload coverage artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-lcov
+          path: |
+            backend/coverage/lcov.info
+            frontend/coverage/lcov.info
+
+      - name: Compute combined coverage
+        run: |
+          node ./scripts/merge-lcov.js backend/coverage/lcov.info frontend/coverage/lcov.info ./coverage/combined.lcov
+
+      - name: Install lcov (genhtml)
+        run: |
+          sudo apt-get update && sudo apt-get install -y lcov
+
+      - name: Generate HTML coverage report
+        run: |
+          mkdir -p coverage/html
+          genhtml coverage/combined.lcov -o coverage/html || true
+
+      - name: Publish coverage site (upload artifact for Pages)
+        uses: actions/upload-pages-artifact@v1
+        with:
+          path: coverage/html
+
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v1
+
+      # Codecov upload removed - relying on local coverage gate and GitHub Pages
+
+      - name: Read combined coverage
+        id: coverage
+        run: |
+          if [ ! -f coverage/combined-coverage.txt ]; then
+            echo "combined-coverage.txt not found, attempting to read metrics from merged lcov"
+            node -e "const fs=require('fs');const s=fs.readFileSync('coverage/combined.lcov','utf8');const L=(s.match(/LF:(\d+)/g)||[]).map(x=>parseInt(x.split(':')[1]));const H=(s.match(/LH:(\d+)/g)||[]).map(x=>parseInt(x.split(':')[1]));const total=L.reduce((a,b)=>a+b,0);const covered=H.reduce((a,b)=>a+b,0);const pct = total===0?0:Math.round(covered/total*100);fs.writeFileSync('coverage/combined-coverage.txt',`total=${total}\ncovered=${covered}\ncoverage=${pct}%\n`);console.log('wrote coverage/combined-coverage.txt')"
+          fi
+          cat coverage/combined-coverage.txt
+
+      - name: Enforce coverage threshold
+        run: |
+          PCT=$(grep '^coverage=' coverage/combined-coverage.txt | cut -d'=' -f2 | tr -d '%') || exit 1
+          echo "Combined coverage: ${PCT}%"
+          THRESHOLD=95
+          if [ "$PCT" -lt "$THRESHOLD" ]; then
+            echo "Coverage ${PCT}% is below required threshold of ${THRESHOLD}%"
+            exit 1
+          fi
+
+      - name: Update README coverage badge
+        run: |
+          node ./scripts/update-badge.js coverage/combined-coverage.txt README.md
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add README.md
+          if git diff --cached --quiet; then
+            echo "No README changes"
+          else
+            git commit -m "ci: update coverage badge"
+            git push
+          fi

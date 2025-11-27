@@ -1,0 +1,62 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  unit-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'npm'
+
+      - name: Install frontend deps
+        working-directory: ./frontend
+        run: npm ci
+
+      - name: Frontend lint
+        working-directory: ./frontend
+        run: npm run lint
+
+      - name: Run frontend unit tests
+        run: npm run test:ci
+        working-directory: ./frontend
+
+      - name: Upload frontend coverage
+        if: always()
+        uses: codecov/codecov-action@v4
+        with:
+          files: ./frontend/coverage/lcov.info
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
+      - name: Install backend deps
+        working-directory: ./backend
+        run: npm ci
+
+      - name: Backend lint
+        working-directory: ./backend
+        run: npm run lint
+
+      - name: Validate Prisma schema
+        working-directory: ./backend
+        run: npm run db:validate
+
+      - name: Run backend unit tests
+        run: npm run test:ci
+        working-directory: ./backend
+
+      - name: Upload backend coverage
+        if: always()
+        uses: codecov/codecov-action@v4
+        with:
+          files: ./backend/coverage/lcov.info
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}

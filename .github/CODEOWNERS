@@ -1,0 +1,8 @@
+# Code owners - adjust to actual GitHub usernames for your team
+* @anupambabar
+
+# Backend ownership
+backend/ @anupambabar
+
+# Frontend ownership
+frontend/ @anupambabar
